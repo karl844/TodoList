@@ -1,0 +1,105 @@
+﻿@model List<TodoList.Models.TodoViewModels.TodoItemViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.Message as string))
+{
+    <div class="alert @((ViewBag.Message as string).Contains("Success") ? "alert-success" : "alert-danger")" role="alert" style="margin-top: 10px;">
+        @(ViewBag.Message)
+    </div>
+}
+
+<h4><a asp-action="Create">Create New</a></h4>
+
+<form id="frm-complete" asp-action="MarkComplete" method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th><input id="chk-all" type="checkbox" /></th>
+                <th>
+                    Title
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    Updated
+                </th>
+                <th>
+                    Is Complete
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Count(); i++)
+            {
+                <tr class="@(Model[i].IsComplete ? "bg-success" : "")">
+                    <td>
+                        @if(!Model[i].IsComplete)
+                        { 
+                            <input asp-for="@(Model[i].IsChecked)" />
+                        }
+                        <input asp-for="@(Model[i].ToDoItemId)" type="hidden" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model[i].Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model[i].Description)
+                    </td>
+                    <td>
+                        @string.Format("{0:dd/MM/yyy HH:mm}", Model[i].UpdatedDateTime)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model[i].IsComplete)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@Model[i].ToDoItemId">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@Model[i].ToDoItemId">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@Model[i].ToDoItemId">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="row">
+        <button onclick="return Check();" type="button" class="btn btn-primary">
+            Mark Complete
+        </button>
+        <span class="text-danger" id="err"></span>
+    </div>
+</form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $('#chk-all').click(function () {
+            if ($('#chk-all').is(':checked')) {
+                $('td:first-child :checkbox').prop('checked', true);
+            }
+            else {
+                $('td:first-child :checkbox').prop('checked', false);
+            }
+        });
+
+        function Check() {
+            let isChecked = false;
+
+            $('tbody tr ').each(function () {
+                if (jQuery('td:first input:checkbox', this).is(':checked')) {
+                    isChecked = true;
+                    return false;
+                }
+            });
+
+            if (isChecked) {
+                $('#frm-complete').submit();
+            } else {
+                $('#err').text('You must check at least one task');                
+            }
+        }
+    </script>
+}
